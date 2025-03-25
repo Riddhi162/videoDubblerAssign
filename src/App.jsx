@@ -10,23 +10,23 @@ import {
 } from '@mantine/core';
 
 const FOREGROUND_COLORS = [
-  '#FF0000',
-  '#00FF00',
-  '#FFFF00',
-  '#0000FF',
-  '#FF00FF',
-  '#00FFFF',
-  '#FFFFFF'
+  '#FF0000',   // Red
+  '#00FF00',   // Green
+  '#FFFF00',   // Yellow
+  '#0000FF',   // Blue
+  '#FF00FF',   // Magenta
+  '#00FFFF',   // Cyan
+  '#FFFFFF'    // White
 ];
 
 const BACKGROUND_COLORS = [
-  '#000000',
-  '#FF0000',
-  '#808080',
-  '#C0C0C0',
-  '#A52A2A',
-  '#800080',
-  '#FFF0F5'
+  '#000000',   // Black
+  '#FF0000',   // Red
+  '#808080',   // Gray
+  '#C0C0C0',   // Silver
+  '#A52A2A',   // Brown
+  '#800080',   // Purple
+  '#FFF0F5'    // Lavender
 ];
 
 function App() {
@@ -36,15 +36,14 @@ function App() {
   const [fgColor, setFgColor] = useState('#FFFFFF');
   const [bgColor, setBgColor] = useState('#000000');
   const [coloredSegments, setColoredSegments] = useState([]);
-  const [previewColor, setPreviewColor] = useState(null);
 
   const handleTextSelection = (event) => {
     const start = event.currentTarget.selectionStart;
     const end = event.currentTarget.selectionEnd;
     const selected = text.substring(start, end);
+    
     setSelectedText(selected);
     setSelectedRange({ start, end });
-    setPreviewColor(null);
   };
 
   const applyColor = () => {
@@ -58,6 +57,7 @@ function App() {
       bgColor
     };
 
+    // Remove any overlapping segments
     const filteredSegments = coloredSegments.filter(
       segment => 
         segment.end <= selectedRange.start || 
@@ -65,7 +65,83 @@ function App() {
     );
 
     setColoredSegments([...filteredSegments, newSegment]);
-    setPreviewColor(null);
+  };
+
+  const renderTextWithColors = () => {
+    if (coloredSegments.length === 0) {
+      return text;
+    }
+
+    // Sort segments by their position in the text
+    const sortedSegments = [...coloredSegments].sort((a, b) => a.start - b.start);
+    
+    let result = [];
+    let lastPosition = 0;
+
+    sortedSegments.forEach(segment => {
+      // Add text before the segment
+      if (segment.start > lastPosition) {
+        result.push(text.substring(lastPosition, segment.start));
+      }
+      
+      // Add the colored segment
+      result.push(
+        <span 
+          key={`${segment.start}-${segment.end}`}
+          style={{
+            color: segment.fgColor,
+            backgroundColor: segment.bgColor
+          }}
+        >
+          {segment.text}
+        </span>
+      );
+      
+      lastPosition = segment.end;
+    });
+
+    // Add remaining text after last segment
+    if (lastPosition < text.length) {
+      result.push(text.substring(lastPosition));
+    }
+
+    return result;
+  };
+
+  const handleForegroundColorSelect = (color) => {
+    setFgColor(color);
+    applyColor();
+  };
+
+  const handleBackgroundColorSelect = (color) => {
+    setBgColor(color);
+    applyColor();
+  };
+
+  const getFgCode = (color) => {
+    const colorMap = {
+      '#FF0000': '31',   // Red
+      '#00FF00': '32',   // Green
+      '#FFFF00': '33',   // Yellow
+      '#0000FF': '34',   // Blue
+      '#FF00FF': '35',   // Magenta
+      '#00FFFF': '36',   // Cyan
+      '#FFFFFF': '37'    // White
+    };
+    return colorMap[color] || '37';
+  };
+
+  const getBgCode = (color) => {
+    const colorMap = {
+      '#000000': '40',   // Black
+      '#FF0000': '41',   // Red
+      '#808080': '100',  // Gray
+      '#C0C0C0': '47',   // Silver
+      '#A52A2A': '41',   // Brown
+      '#800080': '45',   // Purple
+      '#FFF0F5': '47'    // Lavender
+    };
+    return colorMap[color] || '40';
   };
 
   const renderColoredText = () => {
@@ -77,6 +153,7 @@ function App() {
     sortedSegments.forEach(segment => {
       const styledText = 
         `\u001b[${getFgCode(segment.fgColor)};${getBgCode(segment.bgColor)}m${segment.text}\u001b[0m`;
+      
       coloredText = 
         coloredText.slice(0, segment.start) + 
         styledText + 
@@ -84,52 +161,6 @@ function App() {
     });
 
     return coloredText;
-  };
-
-  const handleForegroundColorSelect = (color) => {
-    setFgColor(color);
-    if (selectedText) {
-      setPreviewColor({ 
-        fgColor: color, 
-        bgColor: bgColor 
-      });
-    }
-  };
-
-  const handleBackgroundColorSelect = (color) => {
-    setBgColor(color);
-    if (selectedText) {
-      setPreviewColor({ 
-        fgColor: fgColor, 
-        bgColor: color 
-      });
-    }
-  };
-
-  const getFgCode = (color) => {
-    const colorMap = {
-      '#FF0000': '31',
-      '#00FF00': '32',
-      '#FFFF00': '33',
-      '#0000FF': '34',
-      '#FF00FF': '35',
-      '#00FFFF': '36',
-      '#FFFFFF': '37'
-    };
-    return colorMap[color] || '37';
-  };
-
-  const getBgCode = (color) => {
-    const colorMap = {
-      '#000000': '40',
-      '#FF0000': '41',
-      '#808080': '100',
-      '#C0C0C0': '47',
-      '#A52A2A': '41',
-      '#800080': '45',
-      '#FFF0F5': '47'
-    };
-    return colorMap[color] || '40';
   };
 
   const copyText = () => {
@@ -142,7 +173,6 @@ function App() {
     setFgColor('#FFFFFF');
     setBgColor('#000000');
     setSelectedText('');
-    setPreviewColor(null);
   };
 
   return (
@@ -168,20 +198,25 @@ function App() {
           then copy it using the button below, and send in a Discord message.
         </Text>
       </Paper>
-
-      {previewColor && selectedText ? (
-        <Box 
-          mb="md" 
-          p="xs" 
-          style={{ 
-            backgroundColor: previewColor.bgColor, 
-            color: previewColor.fgColor 
-          }}
-        >
-          Preview: {selectedText}
-        </Box>
-      ) : null}
-
+      <Text size="sm" color="dimmed">
+          This is preview window.
+        </Text>
+      <Box
+        mb="md"
+        p="xs"
+        style={{
+          backgroundColor: '#808080', // Changed to grey
+          border: '1px solid #ced4da',
+          borderRadius: '4px',
+          minHeight: '100px',
+          whiteSpace: 'pre-wrap'
+        }}
+      >
+        {renderTextWithColors()}
+      </Box>
+      <Text size="sm" color="dimmed">
+          Select text from here
+        </Text>
       <Textarea
         value={text}
         onChange={(event) => setText(event.currentTarget.value)}
@@ -223,7 +258,6 @@ function App() {
       </Group>
 
       <Group position="center">
-        <Button onClick={applyColor}>Apply Color to Selected Text</Button>
         <Button onClick={copyText}>Copy Discord Text</Button>
         <Button onClick={resetAll} variant="outline">Reset All</Button>
       </Group>
