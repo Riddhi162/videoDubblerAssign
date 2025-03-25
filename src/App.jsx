@@ -10,23 +10,23 @@ import {
 } from '@mantine/core';
 
 const FOREGROUND_COLORS = [
-  '#FF0000',   // Red
-  '#00FF00',   // Green
-  '#FFFF00',   // Yellow
-  '#0000FF',   // Blue
-  '#FF00FF',   // Magenta
-  '#00FFFF',   // Cyan
-  '#FFFFFF'    // White
+  '#FF0000',   
+  '#00FF00',   
+  '#FFFF00',  
+  '#0000FF',   
+  '#FF00FF',   
+  '#00FFFF',   
+  '#FFFFFF'    
 ];
 
 const BACKGROUND_COLORS = [
-  '#000000',   // Black
-  '#FF0000',   // Red
-  '#808080',   // Gray
-  '#C0C0C0',   // Silver
-  '#A52A2A',   // Brown
-  '#800080',   // Purple
-  '#FFF0F5'    // Lavender
+  '#000000',   
+  '#FF0000',   
+  '#808080',   
+  '#C0C0C0',   
+  '#A52A2A',   
+  '#800080',   
+  '#FFF0F5'    
 ];
 
 function App() {
@@ -57,7 +57,7 @@ function App() {
       bgColor
     };
 
-    // Remove any overlapping segments
+   
     const filteredSegments = coloredSegments.filter(
       segment => 
         segment.end <= selectedRange.start || 
@@ -72,19 +72,19 @@ function App() {
       return text;
     }
 
-    // Sort segments by their position in the text
+    
     const sortedSegments = [...coloredSegments].sort((a, b) => a.start - b.start);
     
     let result = [];
     let lastPosition = 0;
 
     sortedSegments.forEach(segment => {
-      // Add text before the segment
+    
       if (segment.start > lastPosition) {
         result.push(text.substring(lastPosition, segment.start));
       }
       
-      // Add the colored segment
+     
       result.push(
         <span 
           key={`${segment.start}-${segment.end}`}
@@ -100,7 +100,7 @@ function App() {
       lastPosition = segment.end;
     });
 
-    // Add remaining text after last segment
+    
     if (lastPosition < text.length) {
       result.push(text.substring(lastPosition));
     }
@@ -133,13 +133,13 @@ function App() {
 
   const getBgCode = (color) => {
     const colorMap = {
-      '#000000': '40',   // Black
-      '#FF0000': '41',   // Red
-      '#808080': '100',  // Gray
-      '#C0C0C0': '47',   // Silver
-      '#A52A2A': '41',   // Brown
-      '#800080': '45',   // Purple
-      '#FFF0F5': '47'    // Lavender
+      '#000000': '40',  
+      '#FF0000': '41',  
+      '#808080': '100', 
+      '#C0C0C0': '47',  
+      '#A52A2A': '41',   
+      '#800080': '45',   
+      '#FFF0F5': '47'    
     };
     return colorMap[color] || '40';
   };
@@ -205,7 +205,7 @@ function App() {
         mb="md"
         p="xs"
         style={{
-          backgroundColor: '#808080', // Changed to grey
+          backgroundColor: '#808080', 
           border: '1px solid #ced4da',
           borderRadius: '4px',
           minHeight: '100px',
